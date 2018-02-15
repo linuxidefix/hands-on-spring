@@ -9,8 +9,7 @@ public class A_ReactorTest {
     @Test
     public void A_just() {
         // TODO: créer Flux avec les évenements 1, 2, 3
-        Flux<Integer> result = Flux.empty();
-
+        Flux<Integer> result=Flux.fromArray(new Integer[]{1, 2, 3});
         StepVerifier.create(result)
                 .expectNext(1, 2, 3)
                 .verifyComplete();
@@ -19,8 +18,7 @@ public class A_ReactorTest {
     @Test
     public void B_filter() {
         // TODO: prendre uniquement les nombres pair
-        Flux<Integer> result = Flux.range(0, 6);
-
+        Flux<Integer> result = Flux.range(0, 7).filter(i ->  i.intValue()%2==0);
         StepVerifier.create(result)
                 .expectNext(0, 2, 4, 6)
                 .verifyComplete();
@@ -31,8 +29,7 @@ public class A_ReactorTest {
     public void C_map() {
         // TODO: créer Flux avec les évenements 1, 2, 3
         // puis les convertir en chaine de caractère
-        Flux<String> result = Flux.empty();
-
+        Flux<String> result = Flux.empty().range(1,3).map(integer -> integer.toString());
         StepVerifier.create(result)
                 .expectNext("1", "2", "3")
                 .verifyComplete();
@@ -46,7 +43,7 @@ public class A_ReactorTest {
         Flux<Integer> a = Flux.just(1, 2, 3);
         Flux<Integer> b = Flux.just(4, 5, 6);
 
-        Flux<Integer> result = Flux.empty();
+        Flux<Integer> result = Flux.empty().concat(a,b);
 
         StepVerifier.create(result)
                 .expectNext(1, 2, 3, 4, 5, 6)
@@ -63,7 +60,7 @@ public class A_ReactorTest {
         Flux<String> firstname = Flux.just("John", "Sarah", "Bob", "Patrick");
         Flux<String> name = Flux.just("Doe", "Conor", "L'Eponge", "L'étoile");
 
-        Flux<String> result = Flux.empty();
+        Flux<String> result = Flux.zip(firstname,name, (f, n) -> f +" "+ n);
 
         StepVerifier.create(result)
                 .expectNext("John Doe", "Sarah Conor", "Bob L'Eponge", "Patrick L'étoile")
