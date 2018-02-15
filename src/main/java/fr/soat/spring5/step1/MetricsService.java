@@ -32,7 +32,11 @@ public class MetricsService {
      * @return un {@link Flux} du fichier ligne par ligne
      */
     public Flux<String> readFile() {
-        return Flux.error(new RuntimeException("Cette méthode doit lire le fichier FILENAME"));
+        try {
+            return Flux.fromIterable(Files.readAllLines(Paths.get(FILENAME), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException("Error during reading file");
+        }
     }
 
     /**
@@ -43,7 +47,7 @@ public class MetricsService {
      * @return un {@link Flux} des métriques
      */
     public Flux<Metrics> toMetrics() {
-        return Flux.error(new RuntimeException("Cette méthode doit convertir une chaine de caractère en objet Metric"));
+        return  readFile().map( s -> new Metrics(s.split(REGEX)[0], s.split(REGEX)[1]));
 
     }
 
@@ -58,7 +62,7 @@ public class MetricsService {
      */
     @GetMapping(value = "/metrics", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Metrics> watchFile() {
-        return Flux.error(new RuntimeException("Cette méthode doit lire le fichier à interval régulier le fichier"));
+        return Flux.interval(Duration.ofDays(5L)).flatMap(i -> toMetrics());
     }
 
     /**
@@ -70,7 +74,7 @@ public class MetricsService {
      */
     @GetMapping(value = "/metrics/{filter}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Metrics> watchFile(@PathVariable("filter") String filter) {
-        return Flux.error(new RuntimeException("Cette méthode doit lire uniquement la statistique fourni en paramètre"));
+        return watchFile().filter(i -> Objects.equals(filter, i.getName()));
     }
 
 
