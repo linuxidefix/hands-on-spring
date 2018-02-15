@@ -1,8 +1,11 @@
 package fr.soat.spring5.step1;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+
+import java.util.function.Function;
 
 public class A_ReactorTest {
 
@@ -73,7 +76,18 @@ public class A_ReactorTest {
         // TODO: créer un flux qui génère de nouvelles valeurs via l'opérateur flatMap
         Flux<Integer> source = Flux.just(1, 2, 3, 4);
 
-        Flux<String> result = source.flatMap(i -> Flux.just(i.toString()));
+        Flux<String> result = source.flatMap(
+                new Function<Integer, Publisher<? extends String>>() {
+                    @Override
+                    public Publisher<? extends String> apply(Integer integer) {
+                        if (integer==1) return Flux.just("a");
+                        if (integer==2) return Flux.just("b","b");
+                        if (integer==3) return Flux.just("c","c","c");
+                        if (integer==4) return Flux.just("d","d","d","d");
+                        return null;
+                    }
+                }
+        );
 
         StepVerifier.create(result)
                 .expectNext("a", "b", "b", "c", "c", "c", "d", "d", "d", "d")
